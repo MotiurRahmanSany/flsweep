@@ -223,4 +223,4 @@ Issues and pull requests are welcome. Please run `dart analyze` and
 
 ## 📄 License
 
-MIT — see `LICENSE` if present in your distribution.
+Released under the [MIT License](LICENSE.md) — © 2026 Motiur Rahman Sany.
