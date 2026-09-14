@@ -47,7 +47,9 @@ jobs:
         run: dart test
 
       - name: Compile native executable
-        run: dart compile exe bin/flsweep.dart --output build/flsweep
+        run: |
+          mkdir -p build
+          dart compile exe bin/flsweep.dart --output build/flsweep
 
       - name: Package
         shell: bash
