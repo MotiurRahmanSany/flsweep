@@ -53,6 +53,7 @@ class Spinner {
 
   Timer? _timer;
   int _frameIndex = 0;
+  bool get _colored => _logger.colorEnabled;
 
   /// Starts the animation.
   void start() {
@@ -71,7 +72,7 @@ class Spinner {
   }
 
   void _render() {
-    final frame = frames[_frameIndex];
+    final frame = colorize(frames[_frameIndex], AnsiCodes.cyan, enabled: _colored);
     stdout.write('\r$frame $message\x1B[K');
   }
 

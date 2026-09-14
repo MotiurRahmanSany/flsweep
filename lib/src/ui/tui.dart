@@ -233,41 +233,69 @@ class TerminalUI {
     logger.blank();
     logger.header('Sweep summary');
 
+    final rows = <String>[];
     for (final project in projects) {
       final name = p.basename(project.path).padRight(24);
+      String line;
       switch (project.status) {
         case ProjectStatus.completed:
           // In dry-run nothing is deleted, so freedBytes stays 0 — report the
           // measured cleanable size instead, matching the total.
           final bytes = dryRun ? project.preCleanSize : project.freedBytes;
-          logger.step(
-            '✓',
-            '$name ${dryRun ? "cleanable" : "freed"} ${formatBytes(bytes)}',
-          );
+          line = '$name ${dryRun ? "cleanable" : "freed"} ${formatBytes(bytes)}';
+          rows.add(_row('✓', line, AnsiCodes.green));
         case ProjectStatus.failed:
-          logger.step(
-            '✗',
-            '$name ${project.error ?? "failed"}',
-          );
+          line = '$name ${project.error ?? "failed"}';
+          rows.add(_row('✗', line, AnsiCodes.red));
         case ProjectStatus.skipped:
-          logger.step('−', '$name skipped');
+          rows.add(_row('−', '$name skipped', AnsiCodes.gray));
         default:
-          logger.step('·', '$name ${project.status.name}');
+          rows.add(_row('·', '$name ${project.status.name}', AnsiCodes.gray));
       }
     }
 
+    final box = _box('Summary', rows);
+    _writeBox(box);
+
     logger.blank();
     final succeeded = projects.length - failedCount;
+    final elapsedStr = elapsed.inSeconds > 0
+        ? '${elapsed.inSeconds}s'
+        : '${elapsed.inMilliseconds}ms';
     if (dryRun) {
-      logger.success(
-        'Would free ${formatBytes(freedBytes)} across $succeeded project(s).',
+      logger.banner(
+        'Would free ${formatBytes(freedBytes)} across $succeeded project(s) '
+        'in $elapsedStr.',
       );
     } else {
-      logger.success(
+      logger.banner(
         'Freed ${formatBytes(freedBytes)} — $succeeded ok, '
-        '$failedCount failed.',
+        '$failedCount failed · $elapsedStr.',
       );
     }
-    logger.detail('Elapsed: ${elapsed.inSeconds}s');
+  }
+
+  /// Builds a bordered box with a titled header and [rows] of plain text.
+  List<String> _box(String title, List<String> rows) {
+    const intWidth = 48;
+    final topFill = intWidth - title.length - 4;
+    final top = '┌─ $title ${'─' * (topFill > 1 ? topFill : 1)}┐';
+    final rule = '├${'─' * intWidth}┤';
+    final bottom = '└${'─' * intWidth}┘';
+    final padded = rows.map((r) => '│ ${r.padRight(intWidth - 2)} │').toList();
+    return <String>[top, rule, ...padded, bottom];
+  }
+
+  /// Renders one colored summary row: `✓ name freed N` etc.
+  String _row(String symbol, String content, String color) {
+    final sym = colorize(symbol, color, enabled: logger.colorEnabled);
+    final inner = ' $sym $content';
+    return inner.padRight(48);
+  }
+
+  void _writeBox(List<String> box) {
+    for (final line in box) {
+      logger.plain(colorize(line, AnsiCodes.gray, enabled: logger.colorEnabled));
+    }
   }
 }

@@ -240,7 +240,7 @@ class MultiSelectChecklist {
   void _render(ChecklistState state) {
     _erase();
     stdout.writeln(
-      '${colorize('?', AnsiCodes.cyan, enabled: colorEnabled)}'
+      '${colorize('✔', AnsiCodes.cyan, enabled: colorEnabled)}'
       ' $prompt '
       '${colorize(
         '(↑/↓ move, space toggle, a toggle all, enter confirm, q quit)',
@@ -252,7 +252,29 @@ class MultiSelectChecklist {
       stdout.writeln(_rowLabel(state, index));
     }
     stdout.writeln();
-    _renderedLines = options.length + 2;
+    stdout.writeln(
+      colorize(
+        '  ${_badge(state)} selected — press enter to confirm, q to quit',
+        AnsiCodes.gray,
+        enabled: colorEnabled,
+      ),
+    );
+    _renderedLines = options.length + 3;
+  }
+
+  String _badge(ChecklistState state) {
+    final count = state.selectedIndices.length;
+    final total = state.itemCount;
+    final mark = colorize(
+      '$count/$total',
+      count == 0
+          ? AnsiCodes.gray
+          : count == total
+              ? AnsiCodes.green
+              : AnsiCodes.cyan,
+      enabled: colorEnabled,
+    );
+    return mark;
   }
 
   /// Redraws a single row in place (used by the `space` toggle so pressing
@@ -268,18 +290,19 @@ class MultiSelectChecklist {
 
   String _rowLabel(ChecklistState state, int index) {
     final checked = state.checked[index];
-    final checkbox = checked ? '[x]' : '[ ]';
-    final checkboxColor = checked ? AnsiCodes.green : AnsiCodes.blue;
+    final checkbox = checked
+        ? colorize('◉', AnsiCodes.green, enabled: colorEnabled)
+        : colorize('○', AnsiCodes.gray, enabled: colorEnabled);
     final label = _truncate(options[index]);
     final name = ' $label';
     if (index == state.cursor) {
       return '${colorize('❯', AnsiCodes.magenta, enabled: colorEnabled)}'
-          '${colorize(checkbox, checkboxColor, enabled: colorEnabled)}'
+          '${colorize('[', AnsiCodes.magenta, enabled: colorEnabled)}'
+          '$checkbox'
+          '${colorize(']', AnsiCodes.magenta, enabled: colorEnabled)}'
           '${colorize(name, AnsiCodes.bold, enabled: colorEnabled)}';
     }
-    return ' '
-        '${colorize(checkbox, checkboxColor, enabled: colorEnabled)}'
-        '$name';
+    return ' $checkbox$name';
   }
 
   /// Long labels would wrap and break the line-count math, so clip them to

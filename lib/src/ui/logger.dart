@@ -24,12 +24,15 @@ abstract final class AnsiCodes {
   static const String reset = '\x1B[0m';
   static const String bold = '\x1B[1m';
   static const String dim = '\x1B[2m';
+  static const String italic = '\x1B[3m';
   static const String red = '\x1B[31m';
   static const String green = '\x1B[32m';
   static const String yellow = '\x1B[33m';
   static const String blue = '\x1B[34m';
   static const String magenta = '\x1B[35m';
   static const String cyan = '\x1B[36m';
+  static const String gray = '\x1B[90m';
+  static const String bgGray = '\x1B[48;5;236m';
 }
 
 /// Colorizes [message] with [code] when [enabled] is `true`.
@@ -116,18 +119,43 @@ class Logger {
     _write(colorize(message, AnsiCodes.dim, enabled: colorEnabled));
   }
 
-  /// Section header with a bold accent.
+  /// Section header rendered as a soft rule with an accent title, e.g.
+  /// `── Sweep summary ──`.
   void header(String message) {
     if (quiet) {
       return;
     }
     _write(
       colorize(
-        '\n$message',
+        '\n── $message ──',
         '${AnsiCodes.bold}${AnsiCodes.magenta}',
         enabled: colorEnabled,
       ),
     );
+  }
+
+  /// A standout banner line for the final outcome (e.g. storage freed).
+  void banner(String message) {
+    if (quiet) {
+      _write(message);
+      return;
+    }
+    _write(
+      colorize(
+        '✨ $message',
+        '${AnsiCodes.bold}${AnsiCodes.green}',
+        enabled: colorEnabled,
+      ),
+    );
+  }
+
+  /// A thin horizontal rule used to visually group sections.
+  void rule() {
+    if (quiet) {
+      return;
+    }
+    _write(colorize('· ────────────────────────────────', AnsiCodes.gray,
+        enabled: colorEnabled));
   }
 
   /// A step line like `  ⟳ Cleaning app_name …`.
@@ -135,7 +163,21 @@ class Logger {
     if (quiet) {
       return;
     }
-    _write('  $symbol $message');
+    _write('  ${colorize(symbol, _symbolColor(symbol, colorEnabled))} $message');
+  }
+
+  /// Maps a result symbol to its accent color.
+  String _symbolColor(String symbol, bool enabled) {
+    if (!enabled) {
+      return '';
+    }
+    return switch (symbol) {
+      '✓' => AnsiCodes.green,
+      '✗' => AnsiCodes.red,
+      '!' => AnsiCodes.yellow,
+      '−' || '·' => AnsiCodes.gray,
+      _ => AnsiCodes.cyan,
+    };
   }
 
   /// Emits a blank line (skipped in quiet mode).
@@ -144,5 +186,14 @@ class Logger {
       return;
     }
     _write('');
+  }
+
+  /// Writes a raw line with no extra decoration. Colorized externally by
+  /// callers that want a specific accent (e.g. gray box borders).
+  void plain(String message) {
+    if (quiet) {
+      return;
+    }
+    _write(message);
   }
 }
