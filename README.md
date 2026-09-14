@@ -42,12 +42,36 @@ $ flsweep ~/dev --all --deep -c 8
 - **Error isolation** — one broken project never aborts the run. Failures are
   logged, the remaining projects keep processing, and the exit code signals
   the outcome to CI.
+- **Instant startup** — the recommended install is a standalone native
+  executable: `--help` and `--version` respond in milliseconds, and no Dart
+  SDK messages ever appear at runtime.
 
 ---
 
 ## 📦 Installation
 
-### From source (requires the [Dart SDK](https://dart.dev/get-dart) ≥ 3.0)
+### Native executable (recommended)
+
+Build once with any [Dart SDK](https://dart.dev/get-dart) ≥ 3.0, then run
+without Dart entirely:
+
+```bash
+git clone <your-fork-url> flsweep
+cd flsweep
+tool/install.sh          # compiles build/flsweep, installs to ~/.local/bin
+```
+
+The result is a standalone binary that starts instantly and never prints SDK
+messages like *"Resolving dependencies…"*, *"Downloading packages…"*, or
+*"Building package executables…"* — not even on a fresh machine. Set
+`FLSWEEP_INSTALL_DIR` to install somewhere other than `~/.local/bin`.
+
+> Prefer `dart run`? It works, but on a fresh clone (or after dependency
+> changes) the Dart toolchain may print those messages first. They come from
+> the Dart SDK **before** flsweep starts, so no tool or flag can suppress
+> them — the native build is the fix.
+
+### Global activate (pure Dart, auto-rebuilt by the SDK on change)
 
 ```bash
 git clone <your-fork-url> flsweep
@@ -200,6 +224,7 @@ flsweep/
 dart pub get        # fetch dependencies
 dart analyze        # static analysis — zero issues expected
 dart test           # run the full test suite
+tool/build.sh       # compile a standalone native executable to build/flsweep
 ```
 
 The executor's process runner and delete routine are injectable seams, so the
