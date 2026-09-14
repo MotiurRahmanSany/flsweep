@@ -50,7 +50,30 @@ $ flsweep ~/dev --all --deep -c 8
 
 ## 📦 Installation
 
-### Native executable (recommended)
+### One-liner installer (recommended)
+
+Install the latest prebuilt native binary for your OS and architecture — no
+Dart SDK required, no cloning needed:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/MotiurRahmanSany/flsweep/main/install.sh | bash
+```
+
+The script auto-detects Linux/macOS and x64/ARM, downloads the matching
+release artifact, and drops the binary on your `PATH`. Set
+`FLSWEEP_INSTALL_DIR` to install somewhere other than `~/.local/bin`.
+
+### Download a release binary directly
+
+Grab the latest `flsweep` from the [Releases](https://github.com/MotiurRahmanSany/flsweep/releases)
+page, pick the archive for your platform, and put the binary on your `PATH`:
+
+```bash
+tar -xzf flsweep-<version>-linux-x64.tar.gz
+sudo install -m 0755 flsweep /usr/local/bin/
+```
+
+### Build from source (native executable)
 
 Build once with any [Dart SDK](https://dart.dev/get-dart) ≥ 3.0, then run
 without Dart entirely:
@@ -62,8 +85,8 @@ tool/install.sh          # compiles build/flsweep, installs to ~/.local/bin
 ```
 
 The result is a standalone binary that starts instantly and never prints SDK
-messages like *"Resolving dependencies…"*, *"Downloading packages…"*, or
-*"Building package executables…"* — not even on a fresh machine. Set
+messages like *"Resolving dependencies…", "Downloading packages…", or
+"Building package executables…" — not even on a fresh machine. Set
 `FLSWEEP_INSTALL_DIR` to install somewhere other than `~/.local/bin`.
 
 > Prefer `dart run`? It works, but on a fresh clone (or after dependency
