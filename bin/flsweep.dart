@@ -12,7 +12,7 @@ import 'package:flsweep/src/ui/logger.dart';
 import 'package:flsweep/src/ui/spinner.dart';
 import 'package:flsweep/src/ui/tui.dart';
 
-const String version = '1.0.0';
+const String version = '1.0.1';
 
 ArgParser buildParser() {
   return ArgParser()
