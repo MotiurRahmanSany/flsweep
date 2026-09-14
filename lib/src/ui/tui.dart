@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:interact/interact.dart' hide Spinner;
 import 'package:path/path.dart' as p;
 
 import '../models/project_info.dart';
 import '../services/executor.dart';
 import '../services/metrics.dart' show formatBytes;
+import 'checklist.dart';
 import 'logger.dart';
 import 'spinner.dart';
 
@@ -74,17 +74,18 @@ List<String> renderChecklist(List<ProjectInfo> projects) {
 
 /// Interactive terminal UI for flsweep.
 ///
-/// The checklist uses `interact`'s arrow-key multi-select when a real
-/// terminal is attached and gracefully degrades to a numbered prompt that
-/// works over pipes and SSH without a TTY.
+/// The checklist uses flsweep's first-party arrow-key multi-select (with
+/// `a` toggle-all support) when a real terminal is attached and gracefully
+/// degrades to a numbered prompt that works over pipes and SSH without a
+/// TTY.
 class TerminalUI {
   /// Creates a UI bound to [logger].
-  TerminalUI({required this.logger, this.useInteract = true});
+  TerminalUI({required this.logger, this.useInteractive = true});
 
   final Logger logger;
 
-  /// Whether the arrow-key `interact` checklist may be attempted.
-  final bool useInteract;
+  /// Whether the arrow-key checklist may be attempted.
+  final bool useInteractive;
 
   /// Asks the user which projects to sweep.
   ///
@@ -100,15 +101,18 @@ class TerminalUI {
 
     if (_canUseInteractiveChecklist()) {
       try {
-        final labels = <String>[
-          for (final project in projects)
-            '${p.basename(project.path)}  (${formatBytes(project.preCleanSize)})',
-        ];
-        final chosen = MultiSelect(
-          prompt: 'Select projects to sweep (space to toggle, enter to '
-              'confirm, a to toggle all)',
-          options: labels,
-        ).interact();
+        final checklist = MultiSelectChecklist(
+          prompt: 'Select projects to sweep',
+          options: <String>[
+            for (final project in projects)
+              '${p.basename(project.path)}  (${formatBytes(project.preCleanSize)})',
+          ],
+          colorEnabled: logger.colorEnabled,
+        );
+        final chosen = checklist.interact();
+        if (checklist.aborted) {
+          return const <ProjectInfo>[];
+        }
         return [for (final index in chosen) projects[index]];
       } catch (error) {
         logger.detail(
@@ -122,7 +126,7 @@ class TerminalUI {
   }
 
   bool _canUseInteractiveChecklist() {
-    if (!useInteract) {
+    if (!useInteractive) {
       return false;
     }
     try {
@@ -195,8 +199,7 @@ class TerminalUI {
         case ProjectStatus.completed:
           finished++;
           spinner.stop(
-            finalMessage:
-                '${p.basename(event.project.path)} — freed '
+            finalMessage: '${p.basename(event.project.path)} — freed '
                 '${formatBytes(event.project.freedBytes)}',
             symbol: '✓',
           );
@@ -234,10 +237,12 @@ class TerminalUI {
       final name = p.basename(project.path).padRight(24);
       switch (project.status) {
         case ProjectStatus.completed:
+          // In dry-run nothing is deleted, so freedBytes stays 0 — report the
+          // measured cleanable size instead, matching the total.
+          final bytes = dryRun ? project.preCleanSize : project.freedBytes;
           logger.step(
             '✓',
-            '$name ${dryRun ? "cleanable" : "freed"} '
-            '${formatBytes(project.freedBytes)}',
+            '$name ${dryRun ? "cleanable" : "freed"} ${formatBytes(bytes)}',
           );
         case ProjectStatus.failed:
           logger.step(

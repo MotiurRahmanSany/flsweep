@@ -64,18 +64,15 @@ void main() {
     });
 
     test('returns null for a plain Dart package', () {
-      final dir = Directory(p.join(workspace.path, 'plain_pkg'))
-        ..createSync();
+      final dir = Directory(p.join(workspace.path, 'plain_pkg'))..createSync();
       final file = File(p.join(dir.path, 'pubspec.yaml'))
         ..writeAsStringSync(dartPubspec('plain_pkg'));
       expect(extractFlutterProjectName(file.path), isNull);
     });
 
     test('ignores nested flutter-like keys (indentation matters)', () {
-      final dir = Directory(p.join(workspace.path, 'nested_key'))
-        ..createSync();
-      final file = File(p.join(dir.path, 'pubspec.yaml'))
-        ..writeAsStringSync('''
+      final dir = Directory(p.join(workspace.path, 'nested_key'))..createSync();
+      final file = File(p.join(dir.path, 'pubspec.yaml'))..writeAsStringSync('''
 name: nested_key
 dependencies:
   some_plugin:
@@ -85,16 +82,14 @@ dependencies:
     });
 
     test('handles quoted names', () {
-      final dir = Directory(p.join(workspace.path, 'quoted'))
-        ..createSync();
+      final dir = Directory(p.join(workspace.path, 'quoted'))..createSync();
       final file = File(p.join(dir.path, 'pubspec.yaml'))
         ..writeAsStringSync("name: 'quoted_app'\nflutter:\n  assets:\n");
       expect(extractFlutterProjectName(file.path), 'quoted_app');
     });
 
     test('returns null on malformed pubspec without crashing', () {
-      final dir = Directory(p.join(workspace.path, 'broken'))
-        ..createSync();
+      final dir = Directory(p.join(workspace.path, 'broken'))..createSync();
       final file = File(p.join(dir.path, 'pubspec.yaml'))
         ..writeAsStringSync('@@@ :::: not yaml at all {\n');
       expect(extractFlutterProjectName(file.path), isNull);
@@ -124,8 +119,7 @@ dependencies:
       expect(names, {'app_one', 'app_two'});
     });
 
-    test('skips node_modules, .git, and other built-in ignored dirs',
-        () async {
+    test('skips node_modules, .git, and other built-in ignored dirs', () async {
       makeProject(workspace, 'real_app');
       makeProject(workspace, 'dep_app', prefix: 'node_modules/dep');
       makeProject(workspace, 'git_app', prefix: '.git/hooks');

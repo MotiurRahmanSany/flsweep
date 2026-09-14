@@ -179,7 +179,9 @@ class Scanner {
         if (_isIgnoredEntity(entity, base)) {
           continue;
         }
-        final type = entity.statSync().type; // followLinks: false → links resolve to themselves
+        final type = entity
+            .statSync()
+            .type; // followLinks: false → links resolve to themselves
         if (type == FileSystemEntityType.directory) {
           childDirs.add(entity.path);
         } else if (type == FileSystemEntityType.file &&
@@ -260,8 +262,8 @@ String? extractFlutterProjectName(String pubspecPath) {
   for (final rawLine in lines) {
     final line = rawLine.trimRight();
     // Top-level keys start at column 0.
-    final isTopLevel = line.isNotEmpty && !line.startsWith(' ') &&
-        !line.startsWith('#');
+    final isTopLevel =
+        line.isNotEmpty && !line.startsWith(' ') && !line.startsWith('#');
     if (!isTopLevel) {
       continue;
     }

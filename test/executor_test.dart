@@ -16,8 +16,8 @@ class FakeRunner {
   /// Argument signatures (`clean`, `pub get`) that should fail.
   final Set<String> failFor;
 
-  final List<({String executable, List<String> arguments, String cwd})>
-      calls = <({String executable, List<String> arguments, String cwd})>[];
+  final List<({String executable, List<String> arguments, String cwd})> calls =
+      <({String executable, List<String> arguments, String cwd})>[];
 
   /// Whether the runner should emulate a missing `flutter` executable.
   bool throwNotFound = false;
@@ -87,7 +87,8 @@ void main() {
       // Order matters: clean must precede pub get.
       final signatures =
           runner.calls.map((call) => call.arguments.join(' ')).toList();
-      expect(signatures.indexOf('clean'), lessThan(signatures.indexOf('pub get')));
+      expect(
+          signatures.indexOf('clean'), lessThan(signatures.indexOf('pub get')));
     });
 
     test('all commands run inside the project directory', () async {
@@ -123,7 +124,8 @@ void main() {
             }
           }
         }
-        return runner.run(executable, arguments, workingDirectory: workingDirectory);
+        return runner.run(executable, arguments,
+            workingDirectory: workingDirectory);
       }
 
       final executor = SweepExecutor(commandRunner: cleaningRunner);
@@ -179,7 +181,8 @@ void main() {
             p.basename(workingDirectory ?? '') == 'bad_app') {
           return ProcessResult(0, 1, '', 'clean exploded');
         }
-        return runner.run(executable, arguments, workingDirectory: workingDirectory);
+        return runner.run(executable, arguments,
+            workingDirectory: workingDirectory);
       }
 
       final executor = SweepExecutor(commandRunner: selectiveRunner);
@@ -240,7 +243,8 @@ void main() {
             'Working directory does not exist',
           );
         }
-        return runner.run(executable, arguments, workingDirectory: workingDirectory);
+        return runner.run(executable, arguments,
+            workingDirectory: workingDirectory);
       }
 
       final executor = SweepExecutor(commandRunner: cwdAwareRunner);
@@ -294,8 +298,7 @@ void main() {
       expect(tracked.calls.length, 20);
     });
 
-    test('preserves input order in results regardless of completion',
-        () async {
+    test('preserves input order in results regardless of completion', () async {
       final projects = <ProjectInfo>[
         for (var i = 0; i < 6; i++) makeProject(workspace, 'ordered_$i'),
       ];
@@ -318,7 +321,8 @@ void main() {
       final project = makeProject(workspace, 'deep_app');
       Directory(p.join(project.path, 'android', '.gradle'))
           .createSync(recursive: true);
-      Directory(p.join(project.path, 'ios', 'Pods')).createSync(recursive: true);
+      Directory(p.join(project.path, 'ios', 'Pods'))
+          .createSync(recursive: true);
       File(p.join(project.path, 'ios', 'Podfile.lock'))
           .writeAsStringSync('PODS:\n');
       Directory(p.join(project.path, '.dart_tool')).createSync();
@@ -352,7 +356,8 @@ void main() {
       final project = makeProject(workspace, 'shallow_app');
       Directory(p.join(project.path, 'android', '.gradle'))
           .createSync(recursive: true);
-      Directory(p.join(project.path, 'ios', 'Pods')).createSync(recursive: true);
+      Directory(p.join(project.path, 'ios', 'Pods'))
+          .createSync(recursive: true);
 
       final executor = SweepExecutor(commandRunner: runner.run);
       await executor.runAll([project]);

@@ -36,8 +36,7 @@ Future<ProcessResult> defaultCommandRunner(
 /// Windows must never crash the whole sweep.
 void defaultDeepDelete(String targetPath) {
   try {
-    final type =
-        FileSystemEntity.typeSync(targetPath, followLinks: false);
+    final type = FileSystemEntity.typeSync(targetPath, followLinks: false);
     switch (type) {
       case FileSystemEntityType.directory:
         Directory(targetPath).deleteSync(recursive: true);
@@ -459,7 +458,9 @@ class SweepExecutor {
     final stderr = result.stderr;
     if (stderr is String && stderr.trim().isNotEmpty) {
       final lines = stderr.trim().split('\n');
-      return lines.length <= 3 ? lines.join(' ') : '${lines.take(3).join(' ')}…';
+      return lines.length <= 3
+          ? lines.join(' ')
+          : '${lines.take(3).join(' ')}…';
     }
     return 'no stderr output';
   }

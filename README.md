@@ -167,7 +167,8 @@ flsweep/
 2. **Measure** (`metrics.dart`) — for every project, the sizes of `build`,
    `.dart_tool`, `android/.gradle`, `ios/Pods`, and `ios/Podfile.lock` are
    summed recursively (symlinks are never followed).
-3. **Select** (`tui.dart`) — interactive arrow-key checklist (`interact`), or
+3. **Select** (`tui.dart` + `checklist.dart`) — interactive arrow-key checklist
+   with `a` toggle-all (a first-party component built on `dart_console`), or
    zero prompts with `--all` / `--quiet`.
 4. **Execute** (`executor.dart`) — a fixed-size async worker pool runs, per
    project: `flutter clean` → *(optional deep clean)* → `flutter pub get`,
@@ -210,7 +211,7 @@ isolation, deep-clean safety) without a Flutter SDK on the machine.
 | Package | Purpose |
 | --- | --- |
 | [`args`](https://pub.dev/packages/args) | CLI flag parsing |
-| [`interact`](https://pub.dev/packages/interact) | Arrow-key multi-select checklist |
+| [`dart_console`](https://pub.dev/packages/dart_console) | Raw terminal/key input for the interactive checklist |
 | [`mason_logger`](https://pub.dev/packages/mason_logger) | Logger baseline utilities |
 | [`path`](https://pub.dev/packages/path) | Cross-platform path handling everywhere |
 
