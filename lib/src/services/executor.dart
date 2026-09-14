@@ -103,11 +103,19 @@ bool isSafeToDelete(String targetPath, String projectRoot) {
     kBuildDirName,
     kDartToolDirName,
     kGradleDirName,
-    kPodsDirName,
-    kPodfileLockName,
+  };
+  final allowedLower = <String>{
+    ...allowed,
+    kPodsDirName.toLowerCase(),
+    kPodfileLockName.toLowerCase(),
   };
   final segments = p.split(relative);
-  return segments.any(allowed.contains);
+  // Case-insensitive: on Windows NTFS canonicalize lowercases every path, so
+  // `ios/Pods` becomes `ios/pods`; compare against lowercased names so the
+  // whitelist works identically on Linux, macOS, and Windows.
+  return segments
+      .map((segment) => segment.toLowerCase())
+      .any(allowedLower.contains);
 }
 
 /// Best-effort path to the user's home directory across platforms.

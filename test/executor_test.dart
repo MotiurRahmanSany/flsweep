@@ -415,6 +415,20 @@ void main() {
       final pubCache = p.join(root, 'build', '.pub-cache', 'hosted');
       expect(isSafeToDelete(pubCache, root), isFalse);
     });
+
+    test('accepts ios/Pods and ios/Podfile.lock case-insensitively', () {
+      // On Windows, NTFS canonicalizes (and thus lowercases) every path, so
+      // `ios/Pods` reaches the whitelist check as `ios/pods`. The whitelist
+      // must match the canonical *on-disk* name regardless of host casing so
+      // deep-clean behaves identically on Linux/macOS/Windows.
+      final root = p.canonicalize(workspace.path);
+      expect(isSafeToDelete(p.join(root, 'ios', 'Pods'), root), isTrue);
+      expect(isSafeToDelete(p.join(root, 'ios', 'Podfile.lock'), root),
+          isTrue);
+      // The on-disk spelling as canonicalize produces it must also be safe.
+      final canonicalizedPods = p.canonicalize(p.join(root, 'ios', 'Pods'));
+      expect(isSafeToDelete(canonicalizedPods, root), isTrue);
+    });
   });
 
   group('events', () {
